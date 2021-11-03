@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>访问某个域名的全过程 | Gridea</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://woxiaosa.github.io//favicon.ico?v=1635953457533">
+<link rel="stylesheet" href="https://woxiaosa.github.io//styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="查找域名对应的IP
+
+查找浏览器缓存，一般浏览器会缓存DNS记录一段时间，如果在缓存中找到了该URL对应的IP，则直接返回IP
+利用系统调用查找IP，OS在hosts文件中，有时会保存有URL与IP的对应，如果找到了则直接返回IP
+路由器中..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://woxiaosa.github.io/">
+        <img src="https://woxiaosa.github.io//images/avatar.png?v=1635953457533" class="site-logo">
+        <h1 class="site-title">Gridea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://woxiaosa.github.io//atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">访问某个域名的全过程</h2>
+            <div class="post-date">2021-11-03</div>
+            
+            <div class="post-content" v-pre>
+              <h3 id="查找域名对应的ip">查找域名对应的IP</h3>
+<ol>
+<li>查找浏览器缓存，一般浏览器会缓存DNS记录一段时间，如果在缓存中找到了该URL对应的IP，则直接返回IP</li>
+<li>利用系统调用查找IP，OS在hosts文件中，有时会保存有URL与IP的对应，如果找到了则直接返回IP</li>
+<li>路由器中，一般也会保存有DNS缓存，所以也会在路由器的缓存中进行查找，若查找到对应IP，则直接返回。</li>
+<li>如果以上步骤还找不到，那么需要使用DNS协议。向本机运行的DNS客户端，发送一个查询报文，最终DNS客户端会返回一个报文，包含有该主机名对应的IP地址。一般来说，DNS客户端会以<strong>迭代查询</strong>、<strong>递归查询</strong>。</li>
+</ol>
+<ul>
+<li>迭代查询：本机DNS客户端向各个DNS服务器发送查询请求，直到得到响应报文为止</li>
+<li>递归查询：本机DNS客户端，在向DNS服务请求报文时，可以将<strong>允许递归</strong>位置1，然后DNS服务器如果在本机查不到该URL对应的IP，那么需要向其他DNS服务器发送请求报文，直到得到响应报文为止，返回给客户端。<br>
+<img src="https://woxiaosa.github.io//post-images/1635952983584.png" alt="" loading="lazy"><br>
+<img src="https://woxiaosa.github.io//post-images/1635952988271.png" alt="" loading="lazy"></li>
+</ul>
+<ol start="5">
+<li>得到IP地址后，需要与目标服务器，建立TCP连接，这个过程涉及到三次握手，在本文中不赘述。</li>
+<li>建立好连接后，本机浏览器将HTTP请求报文，放入到TCP载荷中，发送到目标服务器。目标服务器收到请求后，将需要返回的资源，放入到报文中，并添加必要的头部信息。</li>
+<li>浏览器在接收到返回的数据包后，将数据进行渲染</li>
+</ol>
+<p><img src="https://woxiaosa.github.io//post-images/1635953388440.webp" alt="" loading="lazy"><br>
+<img src="https://woxiaosa.github.io//post-images/1635953391280.webp" alt="" loading="lazy"></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://woxiaosa.github.io/post/hello-gridea/">
+                  <h3 class="post-title">
+                    Hello Gridea
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
