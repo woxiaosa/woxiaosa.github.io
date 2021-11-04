@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://woxiaosa.github.io//favicon.ico?v=1635953457533">
+<link rel="shortcut icon" href="https://woxiaosa.github.io//favicon.ico?v=1635988886465">
 <link rel="stylesheet" href="https://woxiaosa.github.io//styles/main.css">
 
 
@@ -23,7 +23,7 @@
 查找浏览器缓存，一般浏览器会缓存DNS记录一段时间，如果在缓存中找到了该URL对应的IP，则直接返回IP
 利用系统调用查找IP，OS在hosts文件中，有时会保存有URL与IP的对应，如果找到了则直接返回IP
 路由器中..." />
-    <meta name="keywords" content="" />
+    <meta name="keywords" content="计算机网络" />
   </head>
   <body>
     <div id="app" class="main">
@@ -32,7 +32,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://woxiaosa.github.io/">
-        <img src="https://woxiaosa.github.io//images/avatar.png?v=1635953457533" class="site-logo">
+        <img src="https://woxiaosa.github.io//images/avatar.png?v=1635988886465" class="site-logo">
         <h1 class="site-title">Gridea</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -106,12 +106,11 @@
 <li>如果以上步骤还找不到，那么需要使用DNS协议。向本机运行的DNS客户端，发送一个查询报文，最终DNS客户端会返回一个报文，包含有该主机名对应的IP地址。一般来说，DNS客户端会以<strong>迭代查询</strong>、<strong>递归查询</strong>。</li>
 </ol>
 <ul>
-<li>迭代查询：本机DNS客户端向各个DNS服务器发送查询请求，直到得到响应报文为止</li>
-<li>递归查询：本机DNS客户端，在向DNS服务请求报文时，可以将<strong>允许递归</strong>位置1，然后DNS服务器如果在本机查不到该URL对应的IP，那么需要向其他DNS服务器发送请求报文，直到得到响应报文为止，返回给客户端。<br>
-<img src="https://woxiaosa.github.io//post-images/1635952983584.png" alt="" loading="lazy"><br>
-<img src="https://woxiaosa.github.io//post-images/1635952988271.png" alt="" loading="lazy"></li>
+<li>迭代查询：DNS服务器收到请求报文时，要么返回域名对应的IP地址，要么返回他认为可能知道该信息的DNS服务器的地址</li>
+<li>递归查询：如果DNS服务器不知道被查询域名对应的IP地址，那么该DNS服务器将以DNS客户的身份，继续向其他DNS服务器发送请求报文。<br>
+<img src="https://woxiaosa.github.io//post-images/1635953671198.png" alt="" loading="lazy"></li>
 </ul>
-<ol start="5">
+<ol>
 <li>得到IP地址后，需要与目标服务器，建立TCP连接，这个过程涉及到三次握手，在本文中不赘述。</li>
 <li>建立好连接后，本机浏览器将HTTP请求报文，放入到TCP载荷中，发送到目标服务器。目标服务器收到请求后，将需要返回的资源，放入到报文中，并添加必要的头部信息。</li>
 <li>浏览器在接收到返回的数据包后，将数据进行渲染</li>
@@ -120,6 +119,14 @@
 <img src="https://woxiaosa.github.io//post-images/1635953391280.webp" alt="" loading="lazy"></p>
 
             </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://woxiaosa.github.io/tag/gM9JbMuTD/" class="tag">
+                    计算机网络
+                  </a>
+                
+              </div>
             
             
               <div class="next-post">
