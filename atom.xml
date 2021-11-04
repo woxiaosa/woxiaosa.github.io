@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://woxiaosa.github.io/</id>
     <title>Gridea</title>
-    <updated>2021-11-04T01:21:28.159Z</updated>
+    <updated>2021-11-04T08:59:17.675Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://woxiaosa.github.io/"/>
     <link rel="self" href="https://woxiaosa.github.io/atom.xml"/>
@@ -16,25 +16,108 @@
         <link href="https://woxiaosa.github.io/post/fang-wen-mou-ge-yu-ming-de-quan-guo-cheng/">
         </link>
         <updated>2021-11-03T14:46:30.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="查找域名对应的ip">查找域名对应的IP</h3>
-<ol>
+        <content type="html"><![CDATA[<ol>
 <li>查找浏览器缓存，一般浏览器会缓存DNS记录一段时间，如果在缓存中找到了该URL对应的IP，则直接返回IP</li>
 <li>利用系统调用查找IP，OS在hosts文件中，有时会保存有URL与IP的对应，如果找到了则直接返回IP</li>
 <li>路由器中，一般也会保存有DNS缓存，所以也会在路由器的缓存中进行查找，若查找到对应IP，则直接返回。</li>
-<li>如果以上步骤还找不到，那么需要使用DNS协议。向本机运行的DNS客户端，发送一个查询报文，最终DNS客户端会返回一个报文，包含有该主机名对应的IP地址。一般来说，DNS客户端会以<strong>迭代查询</strong>、<strong>递归查询</strong>。</li>
+<li>如果以上步骤还找不到，那么需要使用DNS协议。向本地DNS服务器，发送一个查询报文，最终会返回一个报文，包含有该主机名对应的IP地址。一般来说，本地DNS服务器会以<strong>迭代查询</strong>、<strong>递归查询</strong>。</li>
 </ol>
 <ul>
 <li>迭代查询：DNS服务器收到请求报文时，要么返回域名对应的IP地址，要么返回他认为可能知道该信息的DNS服务器的地址</li>
 <li>递归查询：如果DNS服务器不知道被查询域名对应的IP地址，那么该DNS服务器将以DNS客户的身份，继续向其他DNS服务器发送请求报文。<br>
 <img src="https://woxiaosa.github.io//post-images/1635953671198.png" alt="" loading="lazy"></li>
 </ul>
-<ol>
-<li>得到IP地址后，需要与目标服务器，建立TCP连接，这个过程涉及到三次握手，在本文中不赘述。</li>
-<li>建立好连接后，本机浏览器将HTTP请求报文，放入到TCP载荷中，发送到目标服务器。目标服务器收到请求后，将需要返回的资源，放入到报文中，并添加必要的头部信息。</li>
-<li>浏览器在接收到返回的数据包后，将数据进行渲染</li>
+<ol start="5">
+<li>得到IP地址后，应用层将所要传输的信息交付给传输层，HTTP请求报文格式一般如下：</li>
 </ol>
-<p><img src="https://woxiaosa.github.io//post-images/1635953388440.webp" alt="" loading="lazy"><br>
-<img src="https://woxiaosa.github.io//post-images/1635953391280.webp" alt="" loading="lazy"></p>
+<pre><code>// HTTP请求报文一般格式
+GET /page.html HTTP/1.1
+Host: www.****.com
+Connection: close
+User-agent: Mozilla/5.0
+Accept-language: zh
+</code></pre>
+<ol start="6">
+<li>传输层</li>
+</ol>
+<ul>
+<li>如果此时本机没有与目标服务器建立连接，那么需要用三次握手来建立连接
+<ul>
+<li>首先随机选择一个序号<code>x</code>，向目标服务器发送一个SYN报文，并进入<code>SYN_SENT</code>状态</li>
+<li>目标服务器收到SYN报文后，对该连接分配资源，将该连接放入到<code>半连接队列</code>，回复一个SYN ACK报文，确认号为<code>x + 1</code>，并随机选择一个序号<code>y</code>，并进入<code>SYN_RECV</code>状态</li>
+<li>本机收到SYN ACK报文后，也对该连接分配资源，并回复ACK报文，确认号为<code>y+1</code>，序号为<code>x+1</code>，进入<code>ESTABLISH</code>状态</li>
+<li>目标服务器收到ACK报文后，将该连接放入到<code>全连接</code>中，然后进入<code>ESTABLISH</code>状态，被<code>accept()</code>调用阻塞的线程将被唤醒，得到该连接对应套接字</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>使用<code>ss -t</code>可以查看本机连接的状态，能够看到不同端口两种队列的实际大小</p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="https://woxiaosa.github.io//post-images/1635993129000.png" alt="" loading="lazy"></figure>
+<ul>
+<li>如果本机已与目标服务器建立连接，那么传输层需要在TCP首部，填入源端口号、目的端口号、序号、接收窗口、校验和等信息，然后将TCP报文段交付给网络层。<br>
+<img src="https://woxiaosa.github.io//post-images/1635990058430.png" alt="" loading="lazy"></li>
+</ul>
+<p>传输层会将应用层传递的数据，放入到SKB中，如果发送队列中，有些SKB没有装满，那么会选择先将这部分SKB装满，然后再按照MSS，将数据划分成一个一个的分片，将其组织为sk_buff（<code>struct sk_buff</code>，是Linux中，用来对数据包进行封包、解包的结构体，sk_buff中包含了传输层、网络层、数据链路层的头部信息、载荷、以及其他元信息）。</p>
+<p>在Linux-5.15的源码中，sk_buff部分定义如下：</p>
+<pre><code class="language-C">struct sk_buff {
+    ......
+    __u16			    inner_transport_header;     // tcp/udp header
+	__u16			    inner_network_header;       // ip/.. header
+	__u16			    inner_mac_header; 
+    unsigned int	len, data_len;
+	__u16			    mac_len, hdr_len;
+    .......
+}
+</code></pre>
+<p>数据全部输入到发送队列或遇到某些错误（没有多余的SKB来存储数据了）后，就会尝试使用<code>tcp_push</code>发送数据。<code>tcp_push</code>会调用其他函数完成数据包的发送，这个过程，还涉及到了发送窗口、拥塞控制等流程的判断。</p>
+<ol start="7">
+<li>传输层调用网络层的某些方法后，会判断本机是否保存对应的路由项，如果没有，会丢弃该报文段。然后会在sk_buff中添加相关IP协议首部信息，包括协议版本、数据报长度、首部校验和等等。此外，会使用ARP协议，得到对应MAC地址。</li>
+</ol>
+<blockquote>
+<p>如果不在同一个子网内，这个地方得到的MAC地址实际上是网关的MAC地址。例如，我使用<code>arp -a</code>查看本机arp缓存，网关ip为<code>10.82.23.1</code>，对应mac地址为<code>10-8c-cf-28-dc-80</code>，使用wireshark抓包，发现目的mac地址为<code>10-8c-cf-28-dc-80</code>。</p>
+</blockquote>
+<blockquote>
+<p>在linux中，可以使用<code>route</code>命令查看路由表，路由表是由一个个的路由项组成的，可以由管理员手动设置，也可以由算法自动生成（动态路由）</p>
+</blockquote>
+<pre><code class="language-C">int __ip_queue_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl,
+		    __u8 tos) {
+    ......
+packet_routed:
+    .....
+	skb_reset_network_header(skb);
+	iph = ip_hdr(skb);
+    .......
+	ip_copy_addrs(iph, fl4);
+    ........
+no_route:
+	rcu_read_unlock();
+	IP_INC_STATS(net, IPSTATS_MIB_OUTNOROUTES);
+	kfree_skb(skb);
+	return -EHOSTUNREACH;
+}
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://woxiaosa.github.io//post-images/1635990266079.png" alt="" loading="lazy"></figure>
+<ol start="8">
+<li>网络层会调用数据链路层的相关方法，发送数据包，该方法会调用网卡的驱动程序，让其将数据组装成帧，然后在物理链路上传输。驱动程序的工作流程，大致为，使用DMA将数据拷贝到网卡的发送队列，拷贝完成后，通知网卡发送数据，网卡发送好后，以终端的形式通知CPU，让其进行SKB等数据结构的清理。</li>
+</ol>
+<p>最终，会到达目标服务器，目标服务器会将需要返回的资源，放入到报文中，并添加必要的头部信息，按照响应的方式发送回来， 浏览器在接收到返回的数据包后，将数据进行渲染。</p>
+<pre><code>// HTTP响应报文一般格式
+HTTP/1.1 200 OK
+Connection: close
+Date: 
+Content-Length: 1111
+Content-Type: text/html
+data..data....data...data
+</code></pre>
+<h4 id="参考链接">参考链接</h4>
+<p>计算机网络 自顶向下方法<br>
+精通Linux内核网络<br>
+https://juejin.cn/post/6970632333397327909<br>
+https://docs.microsoft.com/en-us/windows-hardware/drivers/network/network-interface-card-support<br>
+https://www.cnblogs.com/f-ck-need-u/p/7623252.html#auto_id_6<br>
+https://segmentfault.com/a/1190000008926093<br>
+https://segmentfault.com/a/1190000008836467</p>
 ]]></content>
     </entry>
     <entry>
