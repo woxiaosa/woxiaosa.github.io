@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://woxiaosa.github.io/</id>
     <title>Gridea</title>
-    <updated>2021-11-04T14:56:55.556Z</updated>
+    <updated>2021-11-05T14:21:11.083Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://woxiaosa.github.io/"/>
     <link rel="self" href="https://woxiaosa.github.io/atom.xml"/>
@@ -17,6 +17,11 @@
         </link>
         <updated>2021-11-04T09:10:58.000Z</updated>
         <content type="html"><![CDATA[<h3 id="股票">股票</h3>
+<h4 id="评价标准">评价标准</h4>
+<ul>
+<li>PE市盈率：股价/每股盈利</li>
+<li>EPS每股盈余：利润/流通在外的股数</li>
+</ul>
 <h4 id="定义及分类">定义及分类</h4>
 <p>股票是公司发行的公司所有权凭证，股票有多种分类方式，分类方式1：</p>
 <ul>
@@ -117,10 +122,10 @@
 <h3 id="bondfixed-income">Bond(Fixed Income)</h3>
 <h4 id="yield-of-bonds">Yield of Bonds</h4>
 <ul>
-<li>Current Yield当前收益率</li>
+<li>Current Yield当前收益率：债券的当前收益率是等于债券的年利息与债券当前市场价格之比。</li>
+<li></li>
 </ul>
-<p>债券持有期间的收益率=[年利息收入+（卖出价格-买入价格）/持有年数*买入价格 ]*100%<br>
-如果你花95.92￥买了一个价值100￥的债券，票面利率为5%，那么你的当前收益率为：<br>
+<p>如果你花95.92￥买了一个价值100￥的债券，票面利率为5%，那么你的当前收益率为：<br>
 0.05 * 100 / 95.92 = 5.21%</p>
 <ul>
 <li>Yield to Maturity到期收益率<br>
@@ -135,6 +140,8 @@
 <p>反比关系</p>
 <h3 id="mutul-fund-基金">Mutul Fund 基金</h3>
 <p>基金是指一种利益共享、风险共担的集合证券投资方式。通过发行基金单位，集中投资者的资金，由托管人托管，由基金管理人管理和运用资金，从事股票、债券等金融工具投资，并将投资收益按基金投资者的投资比例进行分配</p>
+<h4 id="基金收益">基金收益</h4>
+<p>基金净值=总净资产/基金份额</p>
 <h4 id="基金的好处">基金的好处</h4>
 <ul>
 <li>专业化管理<br>
@@ -147,6 +154,24 @@
 <li>便捷性</li>
 <li>安全性：监管到位</li>
 </ul>
+<h4 id="基金公司结构">基金公司结构</h4>
+<ul>
+<li>Front Office：sale/Client， generate Revenue</li>
+<li>Middle Office：Bridge between front and back office</li>
+<li>Back Office：Trade/Sales support， Do not generate revenue</li>
+</ul>
+<h4 id="货币时间价值">货币时间价值</h4>
+<p>由于潜在的赚钱能力，现在可用的钱比将来同样的钱更值钱。金融的这一核心原则认为，只要钱能赚取利息，那么越早收到的钱就越值钱。</p>
+<ul>
+<li>终值Future Value（FV）：在未来某一特定日期对资产或现金进行估价。</li>
+<li>现值Present Value（PV）：未来一笔钱的当前价值</li>
+<li>现金流Cash</li>
+</ul>
+<pre><code>EAR = ( 1 + periodic rate)^m – 1=(1+1%)^12-1
+Periodic rate(期间利率) = nominal rate/m（名义利率）
+M= the number of compounding periods per year（一年内复利周期的数目）
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://woxiaosa.github.io//post-images/1636114563421.png" alt="" loading="lazy"></figure>
 <h4 id="基金分类">基金分类</h4>
 <p>按规模是否固定来分：</p>
 <ul>
@@ -236,11 +261,30 @@ r = 15.84%</p>
 </ul>
 <h4 id="主动型基金被动性基金">主动型基金/被动性基金</h4>
 <ul>
-<li>被动型基金：一般选取特定的指数成份股作为投资的对象，不主动寻求超越市场的表现，而是试图复制指数的表现</li>
-<li>主动型基金：寻求取得超越市场的业绩表现为目标的一种基金</li>
+<li>
+<p>被动型基金：一般选取特定的指数成份股作为投资的对象，不主动寻求超越市场的表现，而是试图复制指数的表现</p>
+</li>
+<li>
+<p>主动型基金：寻求取得超越市场的业绩表现为目标的一种基金</p>
+</li>
+<li>
+<p>主动投资：相信个人投资能力能够战胜市场，寻求超越市场的表现</p>
+</li>
+<li>
+<p>被动投资：顺应市场，不追求超越市场的表现</p>
+</li>
 </ul>
 <h4 id="募集资金说明书">募集资金说明书</h4>
-<figure data-type="image" tabindex="1"><img src="https://woxiaosa.github.io//post-images/1636034848278.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://woxiaosa.github.io//post-images/1636034848278.png" alt="" loading="lazy"></figure>
+<ul>
+<li>权证（share warrant）：权证是一种有价证券，投资者付出权利金购买后，有权利（而非义务）在某一特定期间（或特定时点）按约定价格向发行人购买或者出售标的证券。其中：发行人是指上市公司或证券公司等机构</li>
+<li>期权（option）：一种金融衍生品，给予特定时间以特定价格买入/卖出标的物的权利</li>
+</ul>
+<p>区别：</p>
+<ul>
+<li>期权没有发行人，且供给量基本不受限制，标准化合约</li>
+<li>权证通常由上市公司发行，以资产作为担保，权证发行量是有限的，非标准化合约</li>
+</ul>
 ]]></content>
     </entry>
     <entry>
