@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://woxiaosa.github.io/</id>
     <title>Gridea</title>
-    <updated>2021-11-05T14:21:11.083Z</updated>
+    <updated>2021-11-06T08:51:50.474Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://woxiaosa.github.io/"/>
     <link rel="self" href="https://woxiaosa.github.io/atom.xml"/>
@@ -10,6 +10,153 @@
     <logo>https://woxiaosa.github.io/images/avatar.png</logo>
     <icon>https://woxiaosa.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[锁、条件变量、信号量]]></title>
+        <id>https://woxiaosa.github.io/post/suo-tiao-jian-bian-liang-xin-hao-liang/</id>
+        <link href="https://woxiaosa.github.io/post/suo-tiao-jian-bian-liang-xin-hao-liang/">
+        </link>
+        <updated>2021-11-06T07:59:05.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="写在前面">写在前面</h3>
+<p>在多线程环境下，线程、进程之间需要进行同步，以做到互斥的访问临界资源。</p>
+<h3 id="锁">锁</h3>
+<h3 id="条件变量">条件变量</h3>
+<p>在生产者消费者问题中，如果剩余位置为0，生产者会陷入循环等待，在消费者释放空位之前，生产者的循环等待是无意义的，浪费了CPU资源。<strong>条件变量</strong>就是解决这一问题的，它提供了一套挂起/睡眠机制。</p>
+<p>条件变量一般提供两个接口，<code>cond_wait</code>和<code>cond_signal</code>，分别用于挂起当前线程与唤醒等待在该条件变量上的线程。</p>
+<p>下面的代码，展示了使用条件变量<code>condition_variable</code>解决生产者消费者问题。</p>
+<pre><code class="language-C++">#include &lt;iostream&gt;
+#include &lt;thread&gt;
+#include &lt;mutex&gt;
+#include &lt;condition_variable&gt;
+using namespace std;
+
+int empty_slot = 5;
+condition_variable empty_cond;
+mutex empty_mutex;
+int filled_slot = 0;
+condition_variable filled_cond;
+mutex filled_mutex;
+
+void producer() {
+    while (true) {
+        // get a new item
+        unique_lock&lt;mutex&gt; empty_guard(empty_mutex);
+        while (empty_slot == 0) {
+            empty_cond.wait(empty_guard);
+        }
+        empty_slot--;
+        empty_guard.unlock();
+        // add a item
+        unique_lock&lt;mutex&gt; filled_guard(filled_mutex);
+        filled_slot++;
+        filled_cond.notify_one();
+    }
+}
+
+void consumer() {
+    while (true) {
+        unique_lock&lt;mutex&gt; filled_guard(filled_mutex);
+        while (filled_slot == 0) {
+            filled_cond.wait(filled_guard);
+        }
+        filled_slot--;
+        filled_guard.unlock();
+        // consume a item
+        unique_lock&lt;mutex&gt; empty_guard(empty_mutex);
+        empty_slot++;
+        empty_cond.notify_one();
+    }
+}
+
+int main() {
+
+    thread p(producer);
+    thread c(consumer);
+    p.join();
+    c.join();
+    return 0;
+}
+</code></pre>
+<p>wait()函数在返回后，会再次进行检查条件是否满足（slot是否为0），这是为了防止出现<strong>虚假唤醒</strong>。signal可能会一次唤醒多个线程，如果一个线程最早处理，并对条件进行了修改，那么该线程如果继续往下执行，会引发不正确的情况出现。</p>
+<p>一般来说，条件变量的结构体内维护了一个<code>wait_list</code>，记录等待在该条件变量上的线程。</p>
+<p>当线程调用<code>cond_wait</code>时，会首先把线程加入到该条件变量的等待链表中，然后<strong>原子的</strong>挂起/释放锁。然后等待被<code>wakeup</code>，再次持有锁。如果第二步，不能保证原子化，那么会出现以下两种情况：</p>
+<ul>
+<li>先挂起：那么将无法把锁释放，也就不会被其他线程wakeup</li>
+<li>先释放：在挂起前，如果有线程尝试signal，那么该线程再被唤醒时，出现错误</li>
+</ul>
+<h3 id="信号量">信号量</h3>
+<p>信号量在不同线程之间充当信号灯，根据资源的剩余数量，控制线程执行或等待。信号量一般有两个操作，<code>wait</code>和<code>signal</code>。前者在资源数量小于等于0时，进入循环等待；后者会增加可用资源的数量。</p>
+<p>当信号量的初值为1时，与互斥锁差别不大。另外，信号量一般是由条件变量、互斥锁、计数器实现的，可以这么说，信号量利用条件变量实现了更高级的抽象。</p>
+<p>在C++标准库中，仅提供了<code>condition_variable</code>，没有提供信号量。利用信号量机制解决生产者、消费者问题的伪代码如下：</p>
+<pre><code class="language-C">Semaphore filled_sem = 0;
+Semaphore empty_sem = 5;
+
+void producer() {
+    while(True) {
+        new_good = produce_good();
+        wait(empty_sem);
+        safe_add_good(new_good);
+        signal(filled_sem);
+    }
+}
+
+void consumer() {
+    while(True) {
+        wait(filled_sem);
+        new_good = safe_get_good();
+        signal(empty_sem);
+        consume_good(new_good);
+    }
+}
+
+</code></pre>
+<p>尽管C++标准库没有提供信号量，但我们可以基于其原理实现一个信号量出来。下图是信号量实现的伪代码。</p>
+<figure data-type="image" tabindex="1"><img src="https://woxiaosa.github.io//post-images/1636187988498.png" alt="" loading="lazy"></figure>
+<pre><code class="language-C++">class Semaphore {
+private:
+  size_t avail;
+  std::mutex m;
+  std::condition_variable cv;
+
+public:
+  // only one thread can call this; by default, we construct a binary semaphore
+  explicit Semaphore(int avail_ = 1) : avail(avail_) {}
+
+  void wait() {
+    std::unique_lock&lt;std::mutex&gt; lk(m);
+    cv.wait(lk, [this] { return avail &gt; 0; });
+    avail--;
+  }
+
+  void signal() {
+    std::unique_lock&lt;std::mutex&gt; lk(m);
+    avail++;
+    cv.notify_one();
+  }
+
+  size_t available() const {
+    return avail;
+  }
+};
+</code></pre>
+<p>可以注意到，<code>wait()</code>函数中，没有使用<code>while()</code>循环检查条件是否成立，这是因为我们向<code>cv.wait</code>传入了一个lambda函数，<code>cv.wait</code>的函数签名为：</p>
+<pre><code class="language-C++">template&lt; class Predicate &gt; 
+void wait( std::unique_lock&lt;std::mutex&gt;&amp; lock, Predicate pred );
+</code></pre>
+<p>内部是这样调用<code>pred</code>函数的：</p>
+<pre><code class="language-C++">while (!pred()) {
+    wait(lock);
+}
+</code></pre>
+<h3 id="相关问题">相关问题</h3>
+<h4 id="有了互斥锁为什么要需要条件变量">有了互斥锁，为什么要需要条件变量</h4>
+<p>互斥锁与条件变量不是解决同一个问题的。</p>
+<p>互斥锁用于解决临界区问题，保证互斥的访问临界资源；而条件变量通过挂起/唤醒机制来避免循环等待，节省CPU资源，另外条件变量的实现需要用到互斥锁。</p>
+<p>所以说，这二者所解决的问题是不一样的。</p>
+<h3 id="参考">参考</h3>
+<p>现代操作系统：原理与实现<br>
+https://zhu45.org/posts/2019/Oct/20/semaphore/</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[现代金融业务复习]]></title>
         <id>https://woxiaosa.github.io/post/xian-dai-jin-rong-ye-wu-fu-xi/</id>
@@ -115,7 +262,7 @@
 </ul>
 <h4 id="原生品衍生品">原生品/衍生品</h4>
 <ul>
-<li>原生品：衍生品所依据的金融资产</li>
+<li>原生品：货币、外汇、债务性金融商品和所有权性金融商品等金融资产，以及这些金融资产价格的总称,衍生品所依据的金融资产</li>
 <li>衍生品：一种金融合同，价值取决于另一实体的表现</li>
 </ul>
 <p>衍生品诞生的目的：对冲风险，抵消投资过程中伴随的潜在风险和收益</p>
